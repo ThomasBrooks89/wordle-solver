@@ -7,9 +7,10 @@ Also comes with a script that can take a wordlist that is sorted by word frequen
 ## To run:
 
 Needs Streamlit to run the solver script (main.py)
-```pip install streamlit```
-To run - 
-```streamlit run main.py```
+```bash
+pip install streamlit
+streamlit run main.py
+```
 
 
 ## Wordlist Files
