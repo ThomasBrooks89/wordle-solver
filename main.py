@@ -21,8 +21,8 @@ def update_based_on_guess(word, colours):
              
 
 def find_possible_words():
-    possibilities = []
-    for word in words:
+    updated_words = []
+    for word in st.session_state.words:
         word_is_possibility = True
         for i, letter in enumerate(word):
 
@@ -38,23 +38,16 @@ def find_possible_words():
                 word_is_possibility = False
                 break  # yellow letters needs to be in the word, just not in this position
 
+        # make sure that all letters previously found to be yellow are in this word
         if word_is_possibility:
-            possibilities.append(word)
-        if len(possibilities) == 1000:
-            break  # just for early on when there will be loads of matches
-
-    # make sure that all previously found yellow letters are in the words that get suggested
-    results = []
-    for possibility in possibilities:
-        result = True
-        for yellow in st.session_state.yellows:
-            if yellow not in possibility:
-                result = False
-                break
-        if result:
-            results.append(possibility)
-    return results  
-
+            for yellow in st.session_state.yellows:
+                if yellow not in word:
+                    word_is_possibility = False
+                    break
+            if word_is_possibility:
+                updated_words.append(word)
+    return updated_words
+    
 
 def percent_of_certainty(len_suggestions):
     # return a string that tell the user how sure the script is that the 5 suggestions are going to be correct
@@ -98,9 +91,6 @@ def find_probe_word():
     return best_word
 
 
-        
-
-
 #word = input("Word: ")
 #feedback = input("g for green, y for yellow, . for grey: ")
 #update_based_on_guess(word, feedback)
@@ -118,14 +108,11 @@ if "letters" not in st.session_state:
     st.session_state.yellow_letters = {0: set(), 1: set(), 2: set(), 3: set(), 4: set()}
     st.session_state.yellows = set()
     st.session_state.greens = set()
-    st.session_state.letter_scores = assign_letter_scores(words)
-
+    st.session_state.words = words
+    st.session_state.letter_scores = assign_letter_scores(st.session_state.words)
+    
 
 st.title("WORDLE!")
-
-st.write(f"Your remaining letters: {sorted(list(st.session_state.letters))}")
-st.write()
-st.write(f"Your current word: {st.session_state.green_letters[0] if st.session_state.green_letters[0] else "_"} {st.session_state.green_letters[1] if st.session_state.green_letters[1] else "_"} {st.session_state.green_letters[2] if st.session_state.green_letters[2] else "_"} {st.session_state.green_letters[3] if st.session_state.green_letters[3] else "_"} {st.session_state.green_letters[4] if st.session_state.green_letters[4] else "_"}")
 
 with st.sidebar:
     if st.button("Reset", key="reset"):
@@ -134,7 +121,14 @@ with st.sidebar:
         st.session_state.yellow_letters = {0: set(), 1: set(), 2: set(), 3: set(), 4: set()}
         st.session_state.yellows = set()
         st.session_state.greens = set()
-        st.session_state.letter_scores = assign_letter_scores(words)
+        st.session_state.words = words  
+        st.session_state.letter_scores = assign_letter_scores(st.session_state.words)
+        st.rerun()
+
+    st.write("Your remaining letters:")
+    st.write(f"{sorted(list(st.session_state.letters))}")
+    st.write(f"Your current word: {st.session_state.green_letters[0] if st.session_state.green_letters[0] else '_'} {st.session_state.green_letters[1] if st.session_state.green_letters[1] else '_'} {st.session_state.green_letters[2] if st.session_state.green_letters[2] else '_'} {st.session_state.green_letters[3] if st.session_state.green_letters[3] else '_'} {st.session_state.green_letters[4] if st.session_state.green_letters[4] else '_'}")
+    st.write(f"Remaining word possibilites: {len(st.session_state.words)}")
 
 
 # user inputting their word and colours
@@ -158,12 +152,19 @@ if st.button("Give me words!"):
     update_based_on_guess(user_input_word, colours)
     
     st.divider()
-    suggestions = find_possible_words()
-    col1, col2, col3 = st.columns((2,1,2))
-    with col1:
-        st.header(f"{percent_of_certainty(len(suggestions))} sure that it's one of these:")
-        for word in suggestions[:5]:
+    st.session_state.words = find_possible_words()
+col1, col2, col3 = st.columns((2,1,2))
+certainty = percent_of_certainty(len(st.session_state.words))
+
+with col1:
+    if certainty == "0% ":
+        st.header("Not enough data to recommend words yet")
+    else:
+        st.header(f"{certainty} sure that it's one of these:")
+        for word in st.session_state.words[:5]:
             st.subheader(word)
-    with col3:
-        st.header("Or to increase certainty, try:")
-        st.subheader(find_probe_word())
+with col3:
+    if certainty != "*100%* ":  # only show the probe word when the true answer hasn't been found
+        st.header("To increase certainty, maybe try:")
+        st.session_state.probe_word = find_probe_word()
+        st.subheader(st.session_state.probe_word)
