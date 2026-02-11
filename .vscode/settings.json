@@ -1,0 +1,4 @@
+{
+  "python.defaultInterpreterPath": "/home/thomas/Documents/Python/.venv/bin/python",
+  "python.terminal.activateEnvironment": true
+}
