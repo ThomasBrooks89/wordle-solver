@@ -72,6 +72,7 @@ def assign_letter_scores(words):
                 letter_scores[letter] += 15
             else:
                 letter_scores[letter] += 10
+    print(letter_scores)
     return letter_scores
 
 
@@ -133,6 +134,7 @@ with st.sidebar:
 
 # user inputting their word and colours
 user_input_word = st.text_input("What word did you try?")
+user_input_word = user_input_word.lower()
 
 st.write("What colours were the letters?")
 cols = st.columns(5)
@@ -148,11 +150,13 @@ colours = [st.session_state[f"letter_{i}"] for i in range(5)]
 
 
 # showing the word suggestions to the user
-if st.button("Give me words!"):
+if st.button("Give me words!", disabled=len(user_input_word) != 5):
     update_based_on_guess(user_input_word, colours)
     
     st.divider()
-    st.session_state.words = find_possible_words()
+    st.session_state.words = find_possible_words()  # update wordlist with new letter information
+    st.session_state.letter_scores = assign_letter_scores(st.session_state.words)  # update letter scores based on remaining words
+
 col1, col2, col3 = st.columns((2,1,2))
 certainty = percent_of_certainty(len(st.session_state.words))
 
@@ -168,3 +172,5 @@ with col3:
         st.header("To increase certainty, maybe try:")
         st.session_state.probe_word = find_probe_word()
         st.subheader(st.session_state.probe_word)
+
+        
