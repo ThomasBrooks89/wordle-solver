@@ -72,7 +72,6 @@ def assign_letter_scores(words):
                 letter_scores[letter] += 15
             else:
                 letter_scores[letter] += 10
-    print(letter_scores)
     return letter_scores
 
 

@@ -1,7 +1,10 @@
 # Wordle solver (Streamlit)
 
 A simple and crude Wordle solver built with Streamlit.
-Also comes with a script that can take a wordlist that is sorted by word frequency, and scrub it so it only includes words that Wordle will allow
+
+ - Also comes with `word_filterer.py`, a script that can take a wordlist that is sorted by word frequency, and scrub it so it only includes words that Wordle will allow. 
+
+ - Also comes with `best_first_guess.py` a script that generates a "best first guess" word based on how many words, on average, it removes from the available word pool when you choose it as your first guess. You can use it with your own `all_allowed_wordle_answers.json` file or use the ones included. For the current wordlist, it outputs 'lares' as the best word to try first.
 
 
 ## To run:
